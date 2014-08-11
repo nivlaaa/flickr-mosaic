@@ -1,0 +1,40 @@
+#!/usr/bin/env python
+
+import os
+import urllib2
+import xml.etree.ElementTree as ET
+
+# API constants
+API_ENTRY = 'https://api.flickr.com/services/rest/'
+API_KEY = 'XXX'
+INTERESTINGNESS = 'flickr.interestingness.getList'
+
+BASE_URL = API_ENTRY + '?method=' + INTERESTINGNESS + '&api_key=' + API_KEY
+
+# construct photo_url from photo attributes in XML response
+def get_photo_urls(photos):
+    urls = []
+    for photo in photos:
+	attribs = photo.attrib
+	farm_id = attribs['farm']
+	server_id = attribs['server']
+	id = attribs['id']
+	secret = attribs['secret']
+	url = 'https://farm' + farm_id + '.staticflickr.com/' + server_id + '/' + id + '_' + secret + '_s.jpg'
+	urls.append(url)
+	print url
+    return urls
+
+# fetch interesting images of the day from Flickr
+def fetch_images():
+    try:
+	response = urllib2.urlopen(BASE_URL)
+    except urllib2.URLError as e:
+	print 'Reason: ', e.reason
+    else:
+	tree = ET.parse(response)
+	photos = tree.findall('photos/photo')
+	urls = get_photo_urls(photos)
+
+
+fetch_images()
