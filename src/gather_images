@@ -3,6 +3,7 @@
 import os
 import urllib2
 import xml.etree.ElementTree as ET
+import process_image
 
 # API constants
 API_ENTRY = 'https://api.flickr.com/services/rest/'
@@ -38,3 +39,4 @@ def fetch_images():
 
 
 fetch_images()
+process_image.get_avg_rgb('test.jpg')
