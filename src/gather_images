@@ -42,7 +42,6 @@ def save_img(img_url):
         for file in files:
             if file.endswith(".jpg"):
                 file_num += 1
-    print "there are ", file_num, " pictures"
 
     src = IMG_PATH + "tmp.jpg"
     dst = dst_path + str(file_num) + ".jpg"
