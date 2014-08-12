@@ -18,7 +18,7 @@ IMG_PATH = 'xxx' # replace with your own path to work
 
 # retrieve the bucket the photo should be in
 def get_bucket(rgb):
-    INTERVAL = 15
+    INTERVAL = 17
     r = int(rgb[0] / INTERVAL * INTERVAL)
     g = int(rgb[1] / INTERVAL * INTERVAL)
     b = int(rgb[2] / INTERVAL * INTERVAL)
