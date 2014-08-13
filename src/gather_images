@@ -1,20 +1,30 @@
 #!/usr/bin/env python
 
+import argparse
 import os
 import urllib
 import urllib2
 import shutil
+import sys
 import xml.etree.ElementTree as ET
 import process_image
 
+# command line arguements
+parser = argparse.ArgumentParser(description='Fetch images from Flickr.')
+parser.add_argument('-i', action="store", dest="api_key_file", help='file containing Flickr api key', required=True)
+parser.add_argument('-p', action="store", dest="path", help='path to store fetched photos', required=True)
+
+opts = parser.parse_args()
+
+# retrieve the api key from file
+key = None
+with file(opts.api_key_file) as f:
+    key = f.read()
+
 # API constants
 API_ENTRY = 'https://api.flickr.com/services/rest/'
-API_KEY = 'xxx'	# replace with your own key to work
 INTERESTINGNESS = 'flickr.interestingness.getList'
-BASE_URL = API_ENTRY + '?method=' + INTERESTINGNESS + '&api_key=' + API_KEY
-
-# path constants
-IMG_PATH = 'xxx' # replace with your own path to work
+BASE_URL = API_ENTRY + '?method=' + INTERESTINGNESS + '&api_key=' + key
 
 # retrieve the bucket the photo should be in
 def get_bucket(rgb):
@@ -23,13 +33,13 @@ def get_bucket(rgb):
     g = int(rgb[1] / INTERVAL * INTERVAL)
     b = int(rgb[2] / INTERVAL * INTERVAL)
 
-    dst_folder = IMG_PATH + "r" + str(r) + "g" + str(g) + "b" + str(b) + "/"
+    dst_folder = opts.path + "r" + str(r) + "g" + str(g) + "b" + str(b) + "/"
     return dst_folder
 
 # save image to cache and update database
 def save_img(img_url):
-    urllib.urlretrieve(img_url, IMG_PATH + 'tmp.jpg')
-    rgb = process_image.get_avg_rgb(IMG_PATH + 'tmp.jpg')
+    urllib.urlretrieve(img_url, opts.path + 'tmp.jpg')
+    rgb = process_image.get_avg_rgb(opts.path + 'tmp.jpg')
     dst_path = get_bucket(rgb)
     file_num = 0
 
@@ -43,7 +53,7 @@ def save_img(img_url):
             if file.endswith(".jpg"):
                 file_num += 1
 
-    src = IMG_PATH + "tmp.jpg"
+    src = opts.path + "tmp.jpg"
     dst = dst_path + str(file_num) + ".jpg"
     shutil.move(src, dst)
 
