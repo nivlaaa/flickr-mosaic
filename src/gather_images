@@ -67,7 +67,7 @@ def get_photo_urls(photos):
 	server_id = attribs['server']
 	id = attribs['id']
 	secret = attribs['secret']
-	url = 'https://farm' + farm_id + '.staticflickr.com/' + server_id + '/' + id + '_' + secret + '_q.jpg'
+	url = 'https://farm' + farm_id + '.staticflickr.com/' + server_id + '/' + id + '_' + secret + '_z.jpg'
 	urls.append(url)
     return urls
 
