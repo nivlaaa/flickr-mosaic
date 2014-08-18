@@ -8,11 +8,13 @@ import shutil
 import sys
 import xml.etree.ElementTree as ET
 import process_image
+from PIL import Image
 
 # command line arguements
 parser = argparse.ArgumentParser(description='Fetch images from Flickr.')
 parser.add_argument('-i', action="store", dest="api_key_file", help='file containing Flickr api key', required=True)
 parser.add_argument('-p', action="store", dest="path", help='path to store fetched photos', required=True)
+parser.add_argument('-l', action='store', dest='length', type=int, help='the size in pixels of the desired square', default=150)
 
 opts = parser.parse_args()
 
@@ -56,6 +58,11 @@ def save_img(img_url):
     src = opts.path + "tmp.jpg"
     dst = dst_path + str(file_num) + ".jpg"
     shutil.move(src, dst)
+
+    # resize the image
+    image = Image.open(dst)
+    resized_image = process_image.resize_img(image, opts.length)
+    resized_image.save(dst)
 
 
 # construct photo_url from photo attributes in XML response
