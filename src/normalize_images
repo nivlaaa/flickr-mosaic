@@ -16,6 +16,7 @@ opts = parser.parse_args()
 
 for (dirpath, dirnames, filenames) in os.walk(opts.path):
     for filename in filenames:
-	image = Image.open(os.path.join(dirpath, filename))
-	resized_image = process_image.resize_img(image, opts.length)
-	resized_image.save(os.path.join(dirpath, filename))
+	if filename[-4:] == '.jpg':
+	    image = Image.open(os.path.join(dirpath, filename))
+	    resized_image = process_image.resize_img(image, opts.length)
+	    resized_image.save(os.path.join(dirpath, filename))
