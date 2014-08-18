@@ -83,7 +83,7 @@ def fetch_images():
 	urls = get_photo_urls(photos)
 	return urls
 
-
+# main
 urls = fetch_images()
 for url in urls:
     save_img(url)
