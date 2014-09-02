@@ -1,12 +1,12 @@
 #!/usr/bin/env python
 
+import json
 import argparse
 import os
 import urllib
 import urllib2
 import shutil
 import sys
-import xml.etree.ElementTree as ET
 import process_image
 from PIL import Image
 
@@ -26,7 +26,7 @@ with file(opts.api_key_file) as f:
 # API constants
 API_ENTRY = 'https://api.flickr.com/services/rest/'
 INTERESTINGNESS = 'flickr.interestingness.getList'
-BASE_URL = API_ENTRY + '?method=' + INTERESTINGNESS + '&api_key=' + key
+BASE_URL = API_ENTRY + '?method=' + INTERESTINGNESS + '&api_key=' + key.strip() + '&format=json&nojsoncallback=1'
 
 # retrieve the bucket the photo should be in
 def get_bucket(rgb):
@@ -66,13 +66,15 @@ def save_img(img_url):
 
 
 # construct photo_url from photo attributes in XML response
-def get_photo_urls(photos):
+def get_photo_urls(decoded):
     urls = []
-    for photo in photos:
-	attribs = photo.attrib
-	farm_id = attribs['farm']
-	server_id = attribs['server']
-	id = attribs['id']
+    total_photos = decoded['photos']['perpage']
+    photo_list = decoded['photos']['photo']
+    for index in range (0, total_photos):
+	attribs = photo_list[index]
+	farm_id = str(attribs['farm'])
+	server_id = str(attribs['server'])
+	id = str(attribs['id'])
 	secret = attribs['secret']
 	url = 'https://farm' + farm_id + '.staticflickr.com/' + server_id + '/' + id + '_' + secret + '_z.jpg'
 	urls.append(url)
@@ -85,10 +87,13 @@ def fetch_images():
     except urllib2.URLError as e:
 	print 'Reason: ', e.reason
     else:
-	tree = ET.parse(response)
-	photos = tree.findall('photos/photo')
-	urls = get_photo_urls(photos)
-	return urls
+	try:
+	    decoded = json.loads(response.read())
+	except (ValueError, KeyError, TypeError):
+	    print "JSON format error"
+	else:
+	    urls = get_photo_urls(decoded)
+	    return urls
 
 # main
 urls = fetch_images()
