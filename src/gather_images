@@ -41,7 +41,8 @@ def get_bucket(rgb):
 # save image to cache and update database
 def save_img(img_url):
     urllib.urlretrieve(img_url, opts.path + 'tmp.jpg')
-    rgb = process_image.get_avg_rgb(opts.path + 'tmp.jpg')
+    img = Image.open(opts.path + 'tmp.jpg')
+    rgb = process_image.get_avg_rgb(img, img.getbbox())
     dst_path = get_bucket(rgb)
     file_num = 0
 
