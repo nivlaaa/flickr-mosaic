@@ -1,0 +1,60 @@
+#!/usr/bin/env python
+
+import argparse
+import random
+import os
+import urllib
+import urllib2
+import shutil
+import sys
+import xml.etree.ElementTree as ET
+import process_image
+from PIL import Image
+
+# fetchs an image that matches the given rgb value from the library
+def fetch_image(rgb, path):
+    if path[-1] != '/':
+	path = path + '/'
+    INTERVAL = 17
+    r = int(rgb[0] / INTERVAL * INTERVAL)
+    g = int(rgb[1] / INTERVAL * INTERVAL)
+    b = int(rgb[2] / INTERVAL * INTERVAL)
+    path = path + 'r' + str(r) + 'g' + str(g) + 'b' + str(b) + '/'
+    if os.path.exists(path):
+	# count number of pictures currently in the folder
+	file_num = 0
+	for root, dirs, files in os.walk(path):
+	    for file in files:
+		if file.endswith(".jpg"):
+		    file_num += 1
+	path = path + str(random.randrange(0, file_num)) + '.jpg'
+	return Image.open(path)
+    else:
+	return Image.new('RGB', (opts.image, opts.image), RGB)
+
+# command line arguements
+parser = argparse.ArgumentParser(description='Fetch images from Flickr.')
+parser.add_argument('-s', action='store', dest='src', help='path to the src image of the mosaic', required=True)
+parser.add_argument('-p', action='store', dest='path', help='path to fetch photos from', required=True)
+parser.add_argument('-l', action='store', dest='length', type=int, help='the size in pixels of each subimage', default=15)
+parser.add_argument('-i', action='store', dest='image', type=int, help='the size in pixels of each image in the cache', default=150)
+
+opts = parser.parse_args()
+
+src = Image.open(opts.src).convert('RGB')
+img = src
+w = src.size[0] - (src.size[0] % opts.length)
+h = src.size[1] - (src.size[1] % opts.length)
+scale = opts.image / opts.length
+canvas = Image.new('RGB', (w * scale, h * scale))
+
+for x in range (0, w, opts.length):
+    for y in range (0, h, opts.length):
+	box = (x, y, x + opts.length, y + opts.length)
+	RGB = process_image.get_avg_rgb(img, box)
+	sub_image = Image.new('RGB', (opts.image, opts.image), RGB)
+	# sub_image = fetch_image(RGB, opts.path)
+	box = (x * scale, y * scale, (x + opts.length) * scale, (y + opts.length) * scale)
+	canvas.paste(sub_image, box)
+
+canvas.save("output.jpg")
